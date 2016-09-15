@@ -3,19 +3,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 /*
-Plugin Name: Gravity Forms Mc Unique ID Generator Field
-Plugin URI: https://modcoding.com/product/gravity-forms-mc-unique-id-generator-field-wordpress-plugin/
-Description: Unique identifiers generator field - located in Advanced Fields section of Gravity Forms fields editor.
-Version: 1.00
+#IFVER WORDPRESS
+Plugin Name: Gravity Forms Mc Unique ID Generator Field (Lite)
+Plugin URI: https://modcoding.com/product/gravity-forms-mc-unique-id-generator-field-wordpress-plugin/?utm_source=wordpress
+Description: Unique identifiers generator field - located in Advanced Fields section of Gravity Forms fields editor. Lite version, see readme.md for details
+Version: 1.10
 Author: Modular Coding Inc.
-Author URI: https://modcoding.com
-License: See Licenses folder
+Author URI: https://modcoding.com?utm_source=wordpress
+License: GNU GPL v.2
+#ENDIF
+#IFNVER WORDPRESS
+Plugin Name: Gravity Forms Mc Unique ID Generator Field (Full Version)
+Plugin URI: https://modcoding.com/product/gravity-forms-mc-unique-id-generator-field-wordpress-plugin/?utm_source=customer
+Description: Unique identifiers generator field - located in Advanced Fields section of Gravity Forms fields editor.
+Version: 1.10
+Author: Modular Coding Inc.
+Author URI: https://modcoding.com?utm_source=customer
+License: See licenses folder for text of licenses you have purchased
+#ENDIF
 */
 #IFVER NONE
 /* Internal notes
 start date: 25 December 2015
-Hours worked: 15
-weeks: 1
+Hours worked: 20
+weeks: 2
 $ invested: 0
 $ income: 0
 prefix:   MCGFUIDGEN_
@@ -23,7 +34,7 @@ prefix:   mcgfuidgen_
 short name: uidgen
 */
 #ENDIF
-define ("MCGFUIDGEN_PLUGIN_VERSION","?ver=1.00");
+define ("MCGFUIDGEN_PLUGIN_VERSION","?ver=1.10");
 define ("MCGFUIDGEN_TRANSLATE_DOMAIN","mcgfuidgen");
 define ("MCGFUIDGEN_UNQIUEID_TAG", "{UniqueID}");
 define ("MCGFUIDGEN_MAX_RETRY",100); // max attempts to generate random value
@@ -41,8 +52,8 @@ define ("MCGFUIDGEN_LEAD_ENTRY_TABLE",$table_prefix."rg_lead_detail");
 define ("MCGFUIDGEN_LEAD_LONG_ENTRY_TABLE",$table_prefix."rg_lead_detail_long");
 require_once MCGFUIDGEN_PLUGIN_DIR."includes/log.php";
 require_once MCGFUIDGEN_PLUGIN_DIR."includes/functions.php";
-////////////////////////////////////////////////////////// debug ///////////////////////////////////////////////////////
 #IFVER NONE
+////////////////////////////////////////////////////////// debug ///////////////////////////////////////////////////////
 //define ("MCGFUIDGEN_DEBUG",1);
 if (defined("MCGFUIDGEN_DEBUG")) {
 	define ("MCGFUIDGEN_LOG_FILE",MCGFUIDGEN_PLUGIN_DIR."log.txt");
@@ -79,7 +90,7 @@ function mcgfuidgen_add_field_buttons( $field_groups ){
 			$group['fields'][] = array(
 					'class'     => 'button',
 					'data-type' => 'uidgen',
-					'value'     => __( 'MC Unique ID', MCGFUIDGEN_TRANSLATE_DOMAIN  ),
+					'value'     => __( 'Unique ID', MCGFUIDGEN_TRANSLATE_DOMAIN  ),
 					'onclick'   => "StartAddField('uidgen');"
 			);
 			break;
@@ -119,6 +130,21 @@ function mcgfuidgen_field_standard_settings( $position, $form_id ) {
 					<option value="all">Mixed, digits and symbols (A1@b-2C!3)</option>
 			</select>
 		</li>
+<?php
+#IFVER WORDPRESS
+?>
+		<li class="uidgen_separators_setting field_uidgen field_setting">
+			<a href="https://modcoding.com/product/gravity-forms-mc-unique-id-generator-field-wordpress-plugin/?utm_source=wordpress">
+				Please visit our web site
+			</a>
+			to purchase full version with additional functionality (see readme.md file for details in plugin folder).
+			<select id="field_uidgen_separator" class="small gfield_select" onchange="mcgfuidgen_save_settings()" style="display: none"><option value="none" selected="selected">None</option></select>
+			<select id="field_uidgen_separatorfreq" class="medium gfield_select" onchange="mcgfuidgen_save_settings()"><option value="0" selected="selected">None</option></select>
+		</li>
+<?php
+#ENDIF
+#IFNVER WORDPRESS
+?>
 		<li class="uidgen_separators_setting field_uidgen field_setting">
 			<label for="field_uidgen_separator">
 				<?php _e( 'Characters separator', MCGFUIDGEN_TRANSLATE_DOMAIN ); ?>
@@ -148,6 +174,9 @@ function mcgfuidgen_field_standard_settings( $position, $form_id ) {
 					<option value="10">Every 10 symbols</option>
 			</select>
 		</li>
+<?php
+#ENDIF
+?>
 		<li class="uidgen_sequence_setting field_uidgen field_setting">
 			<input type="checkbox" id="field_sequence_enabled"  onclick="mcgfuidgen_save_settings()" />
 			<label for="field_sequence_start" class="mcgfuidgen_iblock" style="width: 75%!important; margin-bottom: 0 !important;">
@@ -241,8 +270,14 @@ function mcgfuidgen_generate_value($form_id,$entry_id,$field_id,$settings){
 	if ((int)$entry_id  == 0)
 		$entry_id = "";
 	$separator = $abc = "";
+#IFVER WORDPRESS
+	$sep = "none";
+	$freq = 0;
+#ENDIF
+#IFNVER WORDPRESS
 	$sep = $settings["separator"];
 	$freq = (int)@$settings["separator_freq"];
+#ENDIF
 	$len = $settings["max_length"];
 	$seq_start = ((int)@$settings["sequence_on"] > 0) ? (int)@$settings["sequence_start"] : -1;
 	$seq_step = (int)@$settings["sequence_step"];
@@ -483,21 +518,6 @@ if ( defined( "MCGFUIDGEN_DEBUG" ) ) mcgfuidgen_log("2.mcgfuidgen_after_submissi
 	}
 }
 
-function mcgfuidgen_shortcode_atts_gravityforms($out, $pairs, $atts){
-if ( defined( "MCGFUIDGEN_DEBUG" ) ) {
-	mcgfuidgen_log(">mcgfuidgen_shortcode_atts_gravityforms");
-	file_put_contents( MCGFUIDGEN_PLUGIN_DIR . "mcgfuidgen_shortcode_atts_gravityforms_out.txt", print_r( $out, true ) );
-	file_put_contents( MCGFUIDGEN_PLUGIN_DIR . "mcgfuidgen_shortcode_atts_gravityforms_pairs.txt", print_r( $pairs, true ) );
-	file_put_contents( MCGFUIDGEN_PLUGIN_DIR . "mcgfuidgen_shortcode_atts_gravityforms_atts.txt", print_r( $atts, true ) );
-}
-	$post_id = (isset($atts["update"]) && ($atts["update"] != "false") && is_numeric(@$atts["update"])) ? $atts["update"] : false;
-	if (! $post_id ) {
-		$post_id = (! empty($GLOBALS['post']->ID) ) ? $GLOBALS['post']->ID : false;
-	}
-	$GLOBALS["mcgfuidgen_post_id"] = $post_id;
-if ( defined( "MCGFUIDGEN_DEBUG" ) )	mcgfuidgen_log("<mcgfuidgen_shortcode_atts_gravityforms post_id = $post_id");
-	return $out;
-}
 ////////////////////////////////////////////////// filters, actions, hooks /////////////////////////////////////////////
 register_activation_hook( __FILE__, 'mcgfuidgen_activation' ); // plugin activation
 // add new field button in fields editor
@@ -516,7 +536,7 @@ add_filter( 'gform_field_type_title' , 'mcgfuidgen_field_type_title', 10, 2);
 if (!is_admin()) add_filter('gform_field_input', 'mcgfuidgen_field_input', 10, 5);
 // adds front scripts and CSS if form has page breaks
 $GLOBALS['MCGFUIDGEN_FRONT'] = 0;
-if ((int)$GLOBALS['MCGF_FRONT_INIT'] <= 0) $GLOBALS['MCGF_FRONT_INIT']= 0;
+if ((int)@$GLOBALS['MCGF_FRONT_INIT'] <= 0) $GLOBALS['MCGF_FRONT_INIT']= 0;
 add_action( 'gform_post_paging', 'mcgfuidgen_post_paging', 10, 3 );
 // Add a custom class to the field li
 add_action("gform_field_css_class", "mcgfuidgen_field_css_class", 10, 3);
@@ -525,6 +545,25 @@ add_action('gform_after_submission', 'mcgfuidgen_after_submission', 10, 2);
 // filter page content
 add_action('init', 'mcgfuidgen_head', 0);
 add_action('wp_footer', 'mcgfuidgen_footer', PHP_INT_MAX);
+#IFNVER WORDPRESS
 // support for Gravity Form Update Post plugin shortcodes: [gravityform id="<FORM_ID>" update="<POST_ID>"] or [gravityform id="<FORM_ID>" update]
 // loads unqiue id value stored on post creation instead of generation new value
+function mcgfuidgen_shortcode_atts_gravityforms($out, $pairs, $atts){
+if ( defined( "MCGFUIDGEN_DEBUG" ) ) {
+	mcgfuidgen_log(">mcgfuidgen_shortcode_atts_gravityforms");
+	file_put_contents( MCGFUIDGEN_PLUGIN_DIR . "mcgfuidgen_shortcode_atts_gravityforms_out.txt", print_r( $out, true ) );
+	file_put_contents( MCGFUIDGEN_PLUGIN_DIR . "mcgfuidgen_shortcode_atts_gravityforms_pairs.txt", print_r( $pairs, true ) );
+	file_put_contents( MCGFUIDGEN_PLUGIN_DIR . "mcgfuidgen_shortcode_atts_gravityforms_atts.txt", print_r( $atts, true ) );
+}
+	$post_id = (isset($atts["update"]) && ($atts["update"] != "false") && is_numeric(@$atts["update"])) ? $atts["update"] : false;
+	if (! $post_id ) {
+		$post_id = (! empty($GLOBALS['post']->ID) ) ? $GLOBALS['post']->ID : false;
+	}
+	$GLOBALS["mcgfuidgen_post_id"] = $post_id;
+if ( defined( "MCGFUIDGEN_DEBUG" ) )	mcgfuidgen_log("<mcgfuidgen_shortcode_atts_gravityforms post_id = $post_id");
+	return $out;
+}
 if (!is_admin()) add_filter( 'shortcode_atts_gravityforms', 'mcgfuidgen_shortcode_atts_gravityforms', 10, 3 );
+#ENDIF
+////////////////////////////////////////////////// end filters, actions, hooks /////////////////////////////////////////
+?>

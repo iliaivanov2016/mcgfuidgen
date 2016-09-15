@@ -16,14 +16,15 @@ or
 
 Versions
 ================================================================================================================================================
+v.1.10 - 12 September 2016
+Full version now supports Graivty Forms Post Update plugin and separators in unqiue identifiers generation.
+
 v.1.00 - 5 January 2016
 Base version of the plugin.
 
-
+All upgrades are free lifetime, even for commercial full version.
 Support and documentation is on official web site:
 
-https://modcoding.com/product/gravity-forms-mc-unique-id-generator-field-wordpress-plugin/
-
-Licenses - see Licenses folder.
+https://modcoding.com
 
 (c) Modular Coding Inc., 2016.
