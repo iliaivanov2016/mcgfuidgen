@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 Plugin Name: Gravity Forms Mc Unique ID Generator Field (Lite)
 Plugin URI: https://modcoding.com/product/gravity-forms-mc-unique-id-generator-field-wordpress-plugin/?utm_source=wordpress
 Description: Unique identifiers generator field - located in Advanced Fields section of Gravity Forms fields editor. Lite version, see readme.md for details
-Version: 1.10
+Version: 1.20
 Author: Modular Coding Inc.
 Author URI: https://modcoding.com?utm_source=wordpress
 License: GNU GPL v.2
@@ -16,25 +16,13 @@ License: GNU GPL v.2
 Plugin Name: Gravity Forms Mc Unique ID Generator Field (Full Version)
 Plugin URI: https://modcoding.com/product/gravity-forms-mc-unique-id-generator-field-wordpress-plugin/?utm_source=customer
 Description: Unique identifiers generator field - located in Advanced Fields section of Gravity Forms fields editor.
-Version: 1.10
+Version: 1.20
 Author: Modular Coding Inc.
 Author URI: https://modcoding.com?utm_source=customer
 License: See licenses folder for text of licenses you have purchased
 #ENDIF
 */
-#IFVER NONE
-/* Internal notes
-start date: 25 December 2015
-Hours worked: 20
-weeks: 2
-$ invested: 0
-$ income: 0
-prefix:   MCGFUIDGEN_
-prefix:   mcgfuidgen_
-short name: uidgen
-*/
-#ENDIF
-define ("MCGFUIDGEN_PLUGIN_VERSION","?ver=1.10");
+define ("MCGFUIDGEN_PLUGIN_VERSION","?ver=1.20");
 define ("MCGFUIDGEN_TRANSLATE_DOMAIN","mcgfuidgen");
 define ("MCGFUIDGEN_UNQIUEID_TAG", "{UniqueID}");
 define ("MCGFUIDGEN_MAX_RETRY",100); // max attempts to generate random value
@@ -52,16 +40,6 @@ define ("MCGFUIDGEN_LEAD_ENTRY_TABLE",$table_prefix."rg_lead_detail");
 define ("MCGFUIDGEN_LEAD_LONG_ENTRY_TABLE",$table_prefix."rg_lead_detail_long");
 require_once MCGFUIDGEN_PLUGIN_DIR."includes/log.php";
 require_once MCGFUIDGEN_PLUGIN_DIR."includes/functions.php";
-#IFVER NONE
-////////////////////////////////////////////////////////// debug ///////////////////////////////////////////////////////
-//define ("MCGFUIDGEN_DEBUG",1);
-if (defined("MCGFUIDGEN_DEBUG")) {
-	define ("MCGFUIDGEN_LOG_FILE",MCGFUIDGEN_PLUGIN_DIR."log.txt");
-	require_once MCGFUIDGEN_PLUGIN_DIR."includes/log.php";
-	global $wpdb;
-	$wpdb->show_errors();
-}
-#ENDIF
 /////////////////////////////////////////////////////// main code //////////////////////////////////////////////////////
 function mcgfuidgen_activation(){
 	global $wpdb;
@@ -110,7 +88,7 @@ function mcgfuidgen_field_standard_settings( $position, $form_id ) {
 			</label>
 			<select id="field_uidgen_length" class="small gfield_select" onchange="mcgfuidgen_save_settings()">
 				<?php for ($i = 1; $i <= 100; $i++) { $sel = ($i == 10) ? 'selected="selected"': ""; ?>
-					<option value="<?=$i?>" <?=$sel?>><?=$i?></option>
+					<option value="<?php echo $i;?>" <?php echo $sel;?>><?php echo $i;?></option>
 				<?php } ?>
 			</select>
 		</li>
@@ -137,9 +115,9 @@ function mcgfuidgen_field_standard_settings( $position, $form_id ) {
 			<a href="https://modcoding.com/product/gravity-forms-mc-unique-id-generator-field-wordpress-plugin/?utm_source=wordpress">
 				Please visit our web site
 			</a>
-			to purchase full version with additional functionality (see readme.md file for details in plugin folder).
+			to purchase <B>Full Version</b> with additional functionality (separators and Post Update plugin support).
 			<select id="field_uidgen_separator" class="small gfield_select" onchange="mcgfuidgen_save_settings()" style="display: none"><option value="none" selected="selected">None</option></select>
-			<select id="field_uidgen_separatorfreq" class="medium gfield_select" onchange="mcgfuidgen_save_settings()"><option value="0" selected="selected">None</option></select>
+			<select id="field_uidgen_separatorfreq" class="medium gfield_select" onchange="mcgfuidgen_save_settings()" style="display: none"><option value="0" selected="selected">None</option></select>
 		</li>
 <?php
 #ENDIF
@@ -179,7 +157,7 @@ function mcgfuidgen_field_standard_settings( $position, $form_id ) {
 ?>
 		<li class="uidgen_sequence_setting field_uidgen field_setting">
 			<input type="checkbox" id="field_sequence_enabled"  onclick="mcgfuidgen_save_settings()" />
-			<label for="field_sequence_start" class="mcgfuidgen_iblock" style="width: 75%!important; margin-bottom: 0 !important;">
+			<label for="field_sequence_start" class="mcgfuidgen_iblock" style="width: 75%!important; margin-bottom: 0 !important; display: inline-block !important;">
 				<?php _e( 'Sequence values', MCGFUIDGEN_TRANSLATE_DOMAIN ); ?>
 				<?php gform_tooltip( 'form_field_uidgen_sequence_tooltip' ) ?>
 			</label>
@@ -205,7 +183,7 @@ function mcgfuidgen_field_appearance_settings( $position, $form_id ) {
 					<option value="span">Span</option>
 					<option value="html">Custom HTML</option>
 			</select>
-			<textarea id="field_uidgen_render_custom_html" placeholder="Custom HTML" style="width:  96%; margin-top: 8px;"  onchange="mcgfuidgen_save_settings()" onblur="mcgfuidgen_save_settings()"><div><?=MCGFUIDGEN_UNQIUEID_TAG?></div></textarea>
+			<textarea id="field_uidgen_render_custom_html" placeholder="Custom HTML" style="width:  96%; margin-top: 8px;"  onchange="mcgfuidgen_save_settings()" onblur="mcgfuidgen_save_settings()"><div><?php echo MCGFUIDGEN_UNQIUEID_TAG;?></div></textarea>
 		</li>
 <?php
 	}
@@ -221,21 +199,18 @@ function mcgfuidgen_tooltips( $tooltips ) {
 }
 
 function mcgfuidgen_editor_js(){
-	$editor_js_url = MCGFUIDGEN_PLUGIN_URL."/assets/js/editor.js?".MCGFUIDGEN_PLUGIN_VERSION;
-	$editor_js_stringify_url = MCGFUIDGEN_PLUGIN_URL."/assets/js/jQuery.stringify.js?".MCGFUIDGEN_PLUGIN_VERSION;
-	$editor_css_url = MCGFUIDGEN_PLUGIN_URL."/assets/css/editor.css?".MCGFUIDGEN_PLUGIN_VERSION;
-	?>
-	<link rel="stylesheet" href="<?=$editor_css_url?>" />
-	<script type='text/javascript'>
-		var MCGFUIDGEN_AJAX_URL = "<?=MCGFUIDGEN_AJAX_URL?>";
-		var MCGFUIDGEN_UNQIUEID_TAG = "<?=MCGFUIDGEN_UNQIUEID_TAG?>";
-		var MCGFUIDGEN_DIGITS = "<?=MCGFUIDGEN_DIGITS?>";
-		var MCGFUIDGEN_ABC = "<?=MCGFUIDGEN_ABC?>";
-		var MCGFUIDGEN_SYMBOLS = "<?=MCGFUIDGEN_SYMBOLS?>";
+	wp_enqueue_script( 'mcgfuidgen-editor', MCGFUIDGEN_PLUGIN_URL."/assets/js/editor.js", array(), MCGFUIDGEN_PLUGIN_VERSION, true );
+	wp_enqueue_script( 'mcgfuidgen-jquery-stringify', MCGFUIDGEN_PLUGIN_URL."/assets/js/jQuery.stringify.js", array(), MCGFUIDGEN_PLUGIN_VERSION, true );
+	wp_enqueue_style( 'mcgfuidgen-editor', MCGFUIDGEN_PLUGIN_URL."/assets/css/editor.css", array(), MCGFUIDGEN_PLUGIN_VERSION, true );
+	echo '
+		<script type=\'text/javascript\'>
+		var MCGFUIDGEN_AJAX_URL = "'.MCGFUIDGEN_AJAX_URL.'";
+		var MCGFUIDGEN_UNQIUEID_TAG = "'.MCGFUIDGEN_UNQIUEID_TAG.'";
+		var MCGFUIDGEN_DIGITS = "'.MCGFUIDGEN_DIGITS.'";
+		var MCGFUIDGEN_ABC = "'.MCGFUIDGEN_ABC.'";
+		var MCGFUIDGEN_SYMBOLS = "'.MCGFUIDGEN_SYMBOLS.'";
 	</script>
-	<script type='text/javascript' src="<?=$editor_js_stringify_url?>"></script>
-	<script type='text/javascript' src="<?=$editor_js_url?>"></script>
-	<?php
+	';
 }
 
 function mcgfuidgen_field_type_title( $title, $field_type ) {
@@ -307,6 +282,7 @@ function mcgfuidgen_generate_value($form_id,$entry_id,$field_id,$settings){
 		else
 		 $abc = MCGFUIDGEN_DIGITS.strtoupper(MCGFUIDGEN_ABC).MCGFUIDGEN_ABC.MCGFUIDGEN_SYMBOLS;
 	}
+#IFNVER WORDPRESS
 	if ($sep == "space") $separator = " ";
 	else
 	if ($sep == "dash") $separator = "-";
@@ -320,6 +296,7 @@ function mcgfuidgen_generate_value($form_id,$entry_id,$field_id,$settings){
 	if ($sep == "quote2") $separator = "&#34;";
 	else
 	if ($sep == "underscore") $separator = "_";
+#ENDIF
 	$abc_len = strlen($abc);
 	$retry = 0;
 if ( defined( "MCGFUIDGEN_DEBUG" ) ) mcgfuidgen_log(">mcgfuidgen_generate_value form_id = $form_id, entry_id = $entry_id, field_id = $field_id, abc len = $abc_len, ABC:\n$abc\nsettings:\n".print_r($settings,true));
@@ -379,7 +356,7 @@ if ( defined( "MCGFUIDGEN_DEBUG" ) ) mcgfuidgen_log("<mcgfuidgen_generate_value 
 
 function mcgfuidgen_field_input($input, $field, $value, $entry_id, $form_id){
 	if ($field->type == 'uidgen') {
-		$post_id = $GLOBALS["mcgfuidgen_post_id"];
+		$post_id = @$GLOBALS["mcgfuidgen_post_id"];
 if (defined("MCGFUIDGEN_DEBUG")) mcgfuidgen_log(">mcgfuidgen_field_input value = $value, entry_id = $entry_id, form_id = $form_id, post_id = $post_id, field:\n".print_r($field,true)."\n".print_r($value,true));
 //		$val = (is_array($value)) ? @$value[ $field['id'] ] : $value;
 		$settings_str = $field->mcgfuidgen_settings;
@@ -443,28 +420,13 @@ if ( defined( "MCGFUIDGEN_DEBUG" ) ) {
 	file_put_contents( MCGFUIDGEN_PLUGIN_DIR . "submit_page_form_" . $form["id"] . ".txt", print_r( $form, true ) );
 	file_put_contents( MCGFUIDGEN_PLUGIN_DIR . "submit_page_request_" . $form["id"] . ".txt", print_r( $_REQUEST, true ) );
 }
-	if ((int)$GLOBALS['MCGF_FRONT_INIT'] <= 0) {
-		$GLOBALS['MCGF_FRONT_INIT'] = 1;
-?>
-	<script type='text/javascript' src='<?=site_url()?>/wp-includes/js/jquery/jquery.js?<?=MCGFUIDGEN_PLUGIN_VERSION?>'></script>
-	<script type='text/javascript' src='<?=site_url()?>/wp-includes/js/jquery/jquery-migrate.min.js?<?=MCGFUIDGEN_PLUGIN_VERSION?>'></script>
-<?php
+	if ((int)@$GLOBALS['MCGF_FRONT_INIT'] <= 0) {
+		 $GLOBALS['MCGF_FRONT_INIT'] = 1;
+//		 wp_enqueue_script( 'jquery', site_url(). '/wp-includes/js/jquery/jquery.js', array(), MCGFUIDGEN_PLUGIN_VERSION, false );
+//		 wp_enqueue_script( 'jquery-migrate', site_url(). '/wp-includes/js/jquery/jquery-migrate.min.js', array(), MCGFUIDGEN_PLUGIN_VERSION, false );
 	} // global init
-	if ((int)$GLOBALS['MCGFUIDGEN_FRONT'] <= 0) {
+	if ((int)@$GLOBALS['MCGFUIDGEN_FRONT'] <= 0) {
 		$GLOBALS['MCGFUIDGEN_FRONT'] = 1;
-?>
-		<script type="text/javascript">
-			var MCGFUIDGEN_AJAX_URL = "<?=MCGFUIDGEN_AJAX_URL?>";
-			var MCGFUIDGEN_FORM_ID = <?=$form["id"]?>;
-			var MCGFUIDGEN_UNQIUEID_TAG = "<?=MCGFUIDGEN_UNQIUEID_TAG?>";
-		</script>
-		<link rel="stylesheet" href="<?=MCGFUIDGEN_PLUGIN_URL?>/assets/css/front.css?<?=MCTX_PLUGIN_VERSION?>" type="text/css"/>
-		<script type="text/javascript" src="<?=MCGFUIDGEN_PLUGIN_URL?>/assets/js/front.js?<?=MCTX_PLUGIN_VERSION?>"></script>
-		<script type="text/javascript">
-        // code to trigger on AJAX form render
-	      try { mcgfuidgen_init(); } catch(e) {}
-		</script>
-		<?php
 	} // MCGFUIDGEN init
 }
 

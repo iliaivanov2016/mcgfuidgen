@@ -16,6 +16,9 @@ or
 
 Versions
 ================================================================================================================================================
+v.1.20 - 14 September 2016
+Code style improved.
+
 v.1.10 - 12 September 2016
 Full version now supports Graivty Forms Post Update plugin and separators in unqiue identifiers generation.
 
