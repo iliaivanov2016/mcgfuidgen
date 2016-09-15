@@ -1,0 +1,19 @@
+.mcgfuidgen_block{
+display: block !important
+}
+.mcgfuidgen_iblock{
+display: inline-block !important
+}
+.mcgfuidgen_hidden{
+display: none !important;
+}
+.mcgfuidgen_inline{
+display: inline !important;
+}
+.mcgfuidgen_nomargin{
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
